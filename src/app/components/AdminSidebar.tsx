@@ -23,7 +23,7 @@ export default function AdminSidebar({
   const handleMenuClick = ({ key }: { key: string }) => {
     if (key === "logout") {
       localStorage.removeItem("role"); // Xóa đăng nhập
-      router.push("/auth"); // Điều hướng đến trang đăng nhập
+      router.push("/auth");
     } else {
       router.push(`/admin/${key}`);
     }
@@ -31,16 +31,16 @@ export default function AdminSidebar({
 
   return (
     <Sider
-      key={collapsed ? "collapsed" : "expanded"}
-      theme="dark"
       collapsible
       collapsed={collapsed}
-      onCollapse={(value) => setCollapsed(value)} // Cập nhật từ AdminPage.tsx
+      onCollapse={(value) => setCollapsed(value)}
       width={250}
       collapsedWidth={80}
-      className="transition-all duration-300 bg-[#001529]"
+      className={`transition-all duration-300 bg-[#001529] ${
+        collapsed ? "w-20" : "w-64"
+      }`}
     >
-      <div className="h-16 flex items-center justify-center text-white text-lg font-bold transition-all duration-300">
+      <div className="h-16 flex items-center justify-center text-white text-lg font-bold">
         {collapsed ? "A" : "Admin Panel"}
       </div>
 

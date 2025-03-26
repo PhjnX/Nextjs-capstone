@@ -17,7 +17,7 @@ export default function AuthPage() {
     if (typeof window !== "undefined") {
       const role = localStorage.getItem("role");
       if (role === "GV") {
-        router.push("/admin");
+        router.replace("/admin"); // Dùng replace thay vì push để tránh bị đẩy vào stack lịch sử
       }
     }
   }, [router]);

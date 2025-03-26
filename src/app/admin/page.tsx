@@ -21,21 +21,21 @@ export default function AdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isMobile, setIsMobile] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const role = localStorage.getItem("role");
-    setIsAuthorized(role === "GV");
-    setIsLoading(false);
-
-    const handleResize = () => setIsMobile(window.innerWidth < 1024);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      const role = localStorage.getItem("role");
+      setIsAuthorized(role === "GV");
+      setIsLoading(false);
+    }
+  }, [isMounted]);
 
   const handleLogout = () => {
     localStorage.removeItem("role");
@@ -73,6 +73,8 @@ export default function AdminPage() {
       {!isMobile && (
         <Sider
           collapsible
+          collapsed={collapsed}
+          onCollapse={() => setCollapsed((prev) => !prev)}
           collapsedWidth={80}
           width={250}
           className="bg-[#001529] hidden lg:block transition-all duration-300"
