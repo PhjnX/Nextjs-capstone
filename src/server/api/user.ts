@@ -68,3 +68,7 @@ export const deleteUser = async (taiKhoan: string) => {
 export const searchUser = async (tuKhoa: string) => {
   return api.get(`/TimKiemNguoiDung?MaNhom=GP01&tuKhoa=${tuKhoa}`);
 };
+
+export const getMyInfor = async ( accessToken: string ) => {
+   return api.post("ThongTinTaiKhoan", accessToken)
+}

@@ -1,4 +1,5 @@
 // server/api/auth.ts
+import { User } from "@/types/user";
 import axios from "axios";
 
 // Endpoint đăng nhập
@@ -48,3 +49,4 @@ export async function login(username: string, password: string) {
     return { success: false, message: "Sai tài khoản hoặc mật khẩu!" };
   }
 }
+
