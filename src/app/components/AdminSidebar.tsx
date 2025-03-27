@@ -1,4 +1,6 @@
-import { useRouter } from "next/navigation";
+"use client";
+import React from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Layout, Menu } from "antd";
 import {
   AppstoreOutlined,
@@ -19,13 +21,14 @@ export default function AdminSidebar({
   setCollapsed,
 }: SidebarProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleMenuClick = ({ key }: { key: string }) => {
     if (key === "logout") {
-      localStorage.removeItem("role"); // Xóa đăng nhập
+      localStorage.removeItem("role"); // Xóa role
       router.push("/auth");
     } else {
-      router.push(`/admin/${key}`);
+      router.push(key); // key ở dưới mình sẽ set là "/admin" hoặc "/admin/users"...
     }
   };
 
@@ -47,14 +50,31 @@ export default function AdminSidebar({
       <Menu
         theme="dark"
         mode="inline"
-        defaultSelectedKeys={["dashboard"]}
         onClick={handleMenuClick}
+        // Xác định item nào được select
+        selectedKeys={[pathname]}
         items={[
-          { key: "dashboard", icon: <MailOutlined />, label: "Dashboard" },
-          { key: "users", icon: <AppstoreOutlined />, label: "Quản lý Users" },
-          { key: "settings", icon: <SettingOutlined />, label: "Cài đặt" },
+          {
+            key: "/admin",
+            icon: <MailOutlined />,
+            label: "Dashboard",
+          },
+          {
+            key: "/admin/users",
+            icon: <AppstoreOutlined />,
+            label: "Quản lý Users",
+          },
+          {
+            key: "/admin/settings",
+            icon: <SettingOutlined />,
+            label: "Cài đặt",
+          },
           { type: "divider" },
-          { key: "logout", icon: <LogoutOutlined />, label: "Đăng xuất" },
+          {
+            key: "logout",
+            icon: <LogoutOutlined />,
+            label: "Đăng xuất",
+          },
         ]}
       />
     </Sider>
