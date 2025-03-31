@@ -1,9 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Button, Layout, Menu, theme } from "antd";
 import {
-  AppstoreOutlined,
   MailOutlined,
   SettingOutlined,
   LogoutOutlined,
@@ -13,21 +13,18 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 type MenuItem = Required<MenuProps>["items"][number];
-import logo from "../../../public/logo-edutech.png"
+import logo from "../../../../public/logo-edutech.png";
 const { Sider } = Layout;
 
 interface SidebarProps {
   setLoading: (value: boolean) => void;
-
 }
-
 
 export default function AdminSidebar({ setLoading }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [selectedKey, setSelectedKey] = useState<string>(pathname); 
+  const [selectedKey, setSelectedKey] = useState<string>(pathname);
   const [collapsed, setCollapsed] = useState(false);
-
 
   const handleMenuClick = ({ key }: { key: string }) => {
     if (key === "logout") {
@@ -35,7 +32,7 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
       router.push("/auth");
     }
     setLoading(true);
-    setSelectedKey(key); 
+    setSelectedKey(key);
 
     setTimeout(() => {
       setLoading(false);
@@ -43,28 +40,30 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
 
     router.push(key);
   };
- 
 
   const adminMenu: MenuItem[] = [
-    !collapsed ? { label: "Trung tâm", type: "group" } : { type: "divider" },
+    !collapsed
+      ? { label: "Giao diện -  Người dùng", type: "group" }
+      : { type: "divider" },
     { key: "/admin", label: "Trang chủ", icon: <MailOutlined /> },
     {
       key: "sub1",
-      label: "Thống kê",
+      label: "Quản lý người dùng",
       icon: <SettingOutlined />,
+
       children: [
         { key: "/admin/users", label: "Danh sách người dùng" },
-        { key: "/admin/class", label: "Danh sách lớp học" },
+        { key: "/admin/users/add-user", label: "Thêm người dùng" },
       ],
     },
     !collapsed ? { label: "Học tập", type: "group" } : { type: "divider" },
     {
       key: "sub2",
-      label: "Lớp học",
+      label: "Quản lý khoá học",
       icon: <SettingOutlined />,
       children: [
-        { key: "/admin/class-list", label: "Danh sách lớp học" },
-        { key: "/admin/add-class", label: "Thêm khóa học" },
+        { key: "/admin/courses", label: "Danh sách khoá học" },
+        { key: "/admin/courses/add-course", label: "Thêm khóa học" },
       ],
     },
     {
@@ -87,13 +86,18 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
         { key: "/admin/settings", label: "Cập nhật mật khẩu" },
       ],
     },
-    { key: "/auth/logout", label: "Đăng xuất", danger: true, icon: <LogoutOutlined /> },
+    {
+      key: "/auth/logout",
+      label: "Đăng xuất",
+      danger: true,
+      icon: <LogoutOutlined />,
+    },
   ];
 
   const {
     token: { colorBgBase, colorTextBase },
   } = theme.useToken();
-  const items = adminMenu
+  const items = adminMenu;
   return (
     <Sider
       breakpoint="md"

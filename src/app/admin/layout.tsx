@@ -1,9 +1,8 @@
 import "../../app/global.css"; // Import global CSS
-import { ReactNode } from "react";
 import AdminLayoutClient from "./AdminLayoutClient";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import CSS cho toast
-import '@ant-design/v5-patch-for-react-19'; 
+import "@ant-design/v5-patch-for-react-19";
 
 export const metadata = {
   title: "Next.js",

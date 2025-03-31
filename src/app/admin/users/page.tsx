@@ -1,32 +1,37 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Table, Tag, Space, Button, Input } from "antd";
-import {
-  SearchOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
-import { getUsers, deleteUser, searchUser } from "@/server/api/user";
+import { Button, Space } from "antd";
 import { useRouter } from "next/navigation";
-import { User } from "@/types/user";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { getUsers, deleteUser } from "@/server/api/user";
+import { User } from "@/types/user";
+import UserTable from "@/app/components/UserFeature/UserTable";
+import SearchInput from "@/app/components/UserFeature/UserSearch";
+import EditUserModal from "@/app/components/UserFeature/EditUserModal"; // Import modal
+
+const removeDiacritics = (str: string) => {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+};
+
 export default function UserList() {
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState<string>("");
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editInitialValues, setEditInitialValues] = useState<Partial<any>>({});
   const router = useRouter();
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Lấy toàn bộ danh sách người dùng
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const res = await getUsers();
+      setAllUsers(res.data);
       setUsers(res.data);
     } catch (error) {
       console.error("Lỗi lấy danh sách người dùng", error);
@@ -35,6 +40,7 @@ export default function UserList() {
     setLoading(false);
   };
 
+  // Xóa user
   const handleDelete = async (taiKhoan: string) => {
     setLoading(true);
     try {
@@ -44,102 +50,51 @@ export default function UserList() {
         autoClose: 3000,
       });
       fetchUsers();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Lỗi xóa người dùng:", error);
-
-      // Kiểm tra nếu API có trả về thông tin chi tiết
-      const errorMessage =
-        error.response?.data ||
-        error.response?.data?.message ||
-        "Xóa người dùng thất bại.";
-
-      if (typeof errorMessage === "object") {
-        toast.error(`❌ ${JSON.stringify(errorMessage)}`, {
-          position: "top-right",
-        });
-      } else {
-        toast.error(`❌ ${errorMessage}`, { position: "top-right" });
+      let errorMessage = "Xóa người dùng thất bại.";
+      if (error && typeof error === "object" && "response" in error) {
+        const err = error as { response?: { data?: any; message?: string } };
+        errorMessage =
+          err.response?.data || err.response?.message || errorMessage;
       }
+      toast.error(`❌ ${errorMessage}`, { position: "top-right" });
     }
     setLoading(false);
   };
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      performSearch();
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchText]);
+  const handleEdit = (taiKhoan: string) => {
+    // Tìm user dựa vào taiKhoan, sau đó set làm initialValues cho modal
+    const userToEdit = allUsers.find((user) => user.taiKhoan === taiKhoan);
+    if (userToEdit) {
+      // Giả sử API updateUser yêu cầu các trường tương tự như addUserForm
+      setEditInitialValues({
+        taiKhoan: userToEdit.taiKhoan,
+        // Nếu cập nhật mật khẩu không cần hiển thị, có thể để trống hoặc bỏ qua
+        matKhau: "",
+        hoTen: userToEdit.hoTen,
+        soDT: userToEdit.soDt,
+        maLoaiNguoiDung: userToEdit.maLoaiNguoiDung,
+        maNhom: "GP01", // hoặc lấy từ user nếu có
+        email: userToEdit.email,
+      });
+      setEditModalVisible(true);
+    }
+  };
 
-  const performSearch = async () => {
-    if (!searchText.trim()) {
-      fetchUsers();
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setUsers(allUsers);
       return;
     }
-    setLoading(true);
-    try {
-      const res = await searchUser(searchText);
-      const filteredUsers = res.data.filter((user: User) =>
-        user.hoTen.toLowerCase().includes(searchText.toLowerCase())
-      );
-      setUsers(filteredUsers);
-    } catch (error) {
-      console.error("Lỗi tìm kiếm người dùng", error);
-      toast.error("❌ Lỗi khi tìm kiếm người dùng!");
-    }
-    setLoading(false);
+    const normalizedSearch = removeDiacritics(trimmed).toLowerCase();
+    const filtered = allUsers.filter((user) => {
+      const normalizedName = removeDiacritics(user.hoTen).toLowerCase();
+      return normalizedName.includes(normalizedSearch);
+    });
+    setUsers(filtered);
   };
-
-  const columns = [
-    {
-      title: "Tài khoản",
-      dataIndex: "taiKhoan",
-      key: "taiKhoan",
-    },
-    {
-      title: "Họ tên",
-      dataIndex: "hoTen",
-      key: "hoTen",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "soDt",
-      key: "soDt",
-    },
-    {
-      title: "Loại người dùng",
-      dataIndex: "maLoaiNguoiDung",
-      key: "maLoaiNguoiDung",
-      render: (text: string) => (
-        <Tag color={text === "GV" ? "geekblue" : "green"}>{text}</Tag>
-      ),
-    },
-    {
-      title: "Hành động",
-      key: "action",
-      render: (_: any, record: User) => (
-        <Space size="middle">
-          <Button
-            type="text"
-            icon={<EditOutlined style={{ color: "#fa8c16", fontSize: 18 }} />}
-            onClick={() =>
-              router.push(`/admin/users/edit-user?tk=${record.taiKhoan}`)
-            }
-          />
-          <Button
-            type="text"
-            icon={<DeleteOutlined style={{ color: "#f5222d", fontSize: 18 }} />}
-            onClick={() => handleDelete(record.taiKhoan)}
-          />
-        </Space>
-      ),
-    },
-  ];
 
   return (
     <div>
@@ -150,20 +105,22 @@ export default function UserList() {
         >
           Thêm người dùng
         </Button>
-        <Input
-          placeholder="Nhập tên người dùng"
-          allowClear
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 300 }}
-          suffix={<SearchOutlined style={{ color: "#1890ff" }} />}
-        />
+        <SearchInput onSearch={handleSearch} delay={500} />
       </Space>
-      <Table
-        columns={columns}
-        dataSource={users}
+
+      <UserTable
+        users={users}
         loading={loading}
-        rowKey="taiKhoan"
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
+
+      {/* Edit modal */}
+      <EditUserModal
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        initialValues={editInitialValues}
+        onUpdate={fetchUsers}
       />
     </div>
   );

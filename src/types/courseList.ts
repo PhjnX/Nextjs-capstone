@@ -1,4 +1,6 @@
 export type CourseList = {
+  taiKhoanNguoiTao: null;
+  danhGia: unknown;
   maKhoaHoc: number | string;
   biDanh: string;
   tenKhoaHoc: string;
@@ -15,6 +17,7 @@ export type CourseList = {
     tenLoaiNguoiDung: null;
   };
   danhMucKhoaHoc: {
+    maDanhMuc: string;
     maDanhMucKhoahoc: string;
     tenDanhMucKhoaHoc: string;
   };
