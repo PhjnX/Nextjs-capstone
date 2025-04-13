@@ -2,11 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-interface Course {
-  maKhoaHoc: number | string;
-  tenKhoaHoc: string;
-  hinhAnh: string | null | undefined;
-}
+import { Course } from "@/types/cart";
 
 const defaultImage =
   "https://media.daily.dev/image/upload/f_auto,q_auto/v1/posts/25fa2d9a027f1042600664a409ab97c2?_a=AQAEuj9";
@@ -29,8 +25,13 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
 
     if (action === "order") {
       alert(`Bạn đã đặt hàng khóa học: ${course.tenKhoaHoc}`);
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      cart.push(course);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      router.push("/cart");
+      window.dispatchEvent(new Event("storage"));
     } else if (action === "cart") {
-      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       cart.push(course);
       localStorage.setItem("cart", JSON.stringify(cart));
 

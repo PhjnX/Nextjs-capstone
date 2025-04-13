@@ -34,7 +34,9 @@ function Header({ onSearch }: { onSearch: any }) {
 
     const updateCartCount = () => {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      setCartCount(cart.length);
+      setCartCount(
+        cart.reduce((acc: number, course: any) => acc + (course.count || 1), 0)
+      );
     };
 
     loadUser();

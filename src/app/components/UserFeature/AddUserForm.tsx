@@ -6,6 +6,7 @@ import { addUser } from "@/server/api/user";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { addUserForm } from "@/types/add-user";
+
 const { Option } = Select;
 
 export default function AddUserForm() {
@@ -26,7 +27,11 @@ export default function AddUserForm() {
   };
 
   return (
-    <Card title="Thêm Người Dùng" className="mx-auto" style={{ maxWidth: 600 }}>
+    <Card
+      title="Thêm Người Dùng"
+      className="mx-auto mt-8"
+      style={{ maxWidth: 600 }}
+    >
       <Form<addUserForm>
         layout="vertical"
         onFinish={onFinish}
@@ -42,9 +47,13 @@ export default function AddUserForm() {
                 { min: 4, message: "Tài khoản phải có ít nhất 4 ký tự!" },
               ]}
             >
-              <Input placeholder="Nhập tài khoản" />
+              <Input
+                className="rounded-md focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Nhập tài khoản"
+              />
             </Form.Item>
           </Col>
+
           <Col span={24}>
             <Form.Item
               label="Mật khẩu"
@@ -54,9 +63,13 @@ export default function AddUserForm() {
                 { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
               ]}
             >
-              <Input.Password placeholder="Nhập mật khẩu" />
+              <Input.Password
+                className="rounded-md focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Nhập mật khẩu"
+              />
             </Form.Item>
           </Col>
+
           <Col span={24}>
             <Form.Item
               label="Họ tên"
@@ -69,9 +82,13 @@ export default function AddUserForm() {
                 },
               ]}
             >
-              <Input placeholder="Nhập họ tên" />
+              <Input
+                className="rounded-md focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Nhập họ tên"
+              />
             </Form.Item>
           </Col>
+
           <Col span={24}>
             <Form.Item
               label="Số điện thoại"
@@ -84,9 +101,13 @@ export default function AddUserForm() {
                 },
               ]}
             >
-              <Input placeholder="Nhập số điện thoại" />
+              <Input
+                className="rounded-md focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Nhập số điện thoại"
+              />
             </Form.Item>
           </Col>
+
           <Col span={24}>
             <Form.Item
               label="Loại người dùng"
@@ -95,21 +116,29 @@ export default function AddUserForm() {
                 { required: true, message: "Vui lòng chọn loại người dùng!" },
               ]}
             >
-              <Select placeholder="Chọn loại người dùng">
+              <Select
+                className="rounded-md focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Chọn loại người dùng"
+              >
                 <Option value="GV">Giáo vụ (GV)</Option>
                 <Option value="HV">Học viên (HV)</Option>
               </Select>
             </Form.Item>
           </Col>
+
           <Col span={24}>
             <Form.Item
               label="Mã nhóm"
               name="maNhom"
               rules={[{ required: true, message: "Vui lòng nhập mã nhóm!" }]}
             >
-              <Input placeholder="Nhập mã nhóm" />
+              <Input
+                className="rounded-md focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Nhập mã nhóm"
+              />
             </Form.Item>
           </Col>
+
           <Col span={24}>
             <Form.Item
               label="Email"
@@ -119,7 +148,10 @@ export default function AddUserForm() {
                 { type: "email", message: "Email không hợp lệ!" },
               ]}
             >
-              <Input placeholder="Nhập email" />
+              <Input
+                className="rounded-md focus:ring-2 focus:ring-blue-500 transition"
+                placeholder="Nhập email"
+              />
             </Form.Item>
           </Col>
         </Row>

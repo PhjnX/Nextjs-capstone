@@ -1,10 +1,11 @@
+// src/components/EditUserModal.tsx
 "use client";
 
 import React, { useEffect } from "react";
 import { Modal, Form, Input, Button, Select, Row, Col } from "antd";
 import { toast } from "react-toastify";
 import { updateUser } from "@/server/api/user";
-import { addUserForm } from "@/types/add-user"; 
+import { addUserForm } from "@/types/add-user"; // Giả sử kiểu dùng chung cho Add & Update
 
 const { Option } = Select;
 
@@ -12,7 +13,7 @@ interface EditUserModalProps {
   visible: boolean;
   onClose: () => void;
   initialValues: Partial<addUserForm>;
-  onUpdate: () => void; 
+  onUpdate: () => void; // Hàm gọi lại sau khi cập nhật thành công (ví dụ: reload danh sách)
 }
 
 export default function EditUserModal({
@@ -62,6 +63,7 @@ export default function EditUserModal({
               name="taiKhoan"
               rules={[{ required: true, message: "Vui lòng nhập tài khoản!" }]}
             >
+              {/* Nếu muốn không cho chỉnh sửa tài khoản, set disabled */}
               <Input placeholder="Nhập tài khoản" disabled />
             </Form.Item>
           </Col>

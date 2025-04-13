@@ -1,10 +1,26 @@
 "use client";
 
-import { Layout, Breadcrumb, Avatar, Dropdown, MenuProps, Typography, Divider, Space, message } from "antd";
-import { HomeOutlined, UserOutlined, LogoutOutlined, LockOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import {
+  Layout,
+  Breadcrumb,
+  Avatar,
+  Dropdown,
+  MenuProps,
+  Typography,
+  Divider,
+  Space,
+  message,
+} from "antd";
+import {
+  HomeOutlined,
+  UserOutlined,
+  LogoutOutlined,
+  LockOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 
 import { useRouter, usePathname } from "next/navigation";
-
+import { logout } from "@/app/utils/logout";
 const { Header } = Layout;
 const { Text } = Typography;
 
@@ -22,32 +38,29 @@ export default function CustomHeader({ user }: UserProps) {
   const pathname = usePathname();
 
   const handleLogout = () => {
+    logout(); // Gọi hàm xóa session (localStorage) dùng chung
     message.success("Đăng xuất thành công!");
-    localStorage.removeItem("maLoaiNguoiDung");
     router.push("/auth");
   };
 
   const generateBreadcrumbs = () => {
-    const pathArray = pathname.split("/").filter((x) => x); 
-    const breadcrumbs = [{ title: <HomeOutlined />, href: "/admin" }]; 
-  
+    const pathArray = pathname.split("/").filter((x) => x);
+    const breadcrumbs = [{ title: <HomeOutlined />, href: "/admin" }];
+
     pathArray.forEach((path, index) => {
       const href = `/${pathArray.slice(0, index + 1).join("/")}`;
-  
       const breadcrumbTitle: { [key: string]: string } = {
         dashboard: "Trang chủ",
- 
       };
-  
+
       breadcrumbs.push({
         title: <span>{breadcrumbTitle[path] || path}</span>,
         href,
       });
     });
-  
+
     return breadcrumbs;
   };
-  
 
   const breadcrumbItems = generateBreadcrumbs();
 
@@ -58,19 +71,37 @@ export default function CustomHeader({ user }: UserProps) {
       key: "avatar",
       label: (
         <div className="w-44">
-          <Space direction="horizontal" size="small" style={{ display: "flex" }}>
-            <Avatar size={50} src={avatarSrc} icon={!avatarSrc ? <UserOutlined /> : undefined} />
+          <Space
+            direction="horizontal"
+            size="small"
+            style={{ display: "flex" }}
+          >
+            <Avatar
+              size={50}
+              src={avatarSrc}
+              icon={!avatarSrc ? <UserOutlined /> : undefined}
+            />
             <div className="flex flex-col">
               <Text strong>{user?.hoTen || "Người dùng"}</Text>
-              <Text type="secondary">{user?.maLoaiNguoiDung|| "Vai trò"}</Text>
+              <Text type="secondary">{user?.maLoaiNguoiDung || "Vai trò"}</Text>
             </div>
           </Space>
           <Divider style={{ margin: "10px 0" }} />
         </div>
       ),
     },
-    { key: "profile", label: "Thông tin", icon: <InfoCircleOutlined /> },
-    { key: "change-password", label: "Đổi mật khẩu", icon: <LockOutlined /> },
+    {
+      key: "profile",
+      label: "Thông tin",
+      icon: <InfoCircleOutlined />,
+      onClick: () => router.push("/admin/profile"),
+    },
+    {
+      key: "change-password",
+      label: "Đổi mật khẩu",
+      icon: <LockOutlined />,
+      onClick: () => router.push("/admin/password"),
+    },
     { type: "divider" },
     {
       key: "logout",
@@ -101,7 +132,12 @@ export default function CustomHeader({ user }: UserProps) {
     >
       <Breadcrumb items={breadcrumbItems} />
 
-      <Dropdown menu={{ items: userMenuItems }} trigger={["click"]} placement="bottomRight" arrow>
+      <Dropdown
+        menu={{ items: userMenuItems }}
+        trigger={["click"]}
+        placement="bottomRight"
+        arrow
+      >
         <div
           style={{
             display: "flex",
@@ -110,7 +146,11 @@ export default function CustomHeader({ user }: UserProps) {
             cursor: "pointer",
           }}
         >
-          <Avatar size="default" src={avatarSrc} icon={!avatarSrc ? <UserOutlined /> : undefined} />
+          <Avatar
+            size="default"
+            src={avatarSrc}
+            icon={!avatarSrc ? <UserOutlined /> : undefined}
+          />
         </div>
       </Dropdown>
     </Header>

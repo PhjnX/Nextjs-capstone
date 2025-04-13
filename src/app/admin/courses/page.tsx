@@ -1,3 +1,4 @@
+// File: /app/courses/page.tsx
 "use client";
 import React, { useEffect, useState } from "react";
 import { Space, Button } from "antd";
@@ -9,7 +10,9 @@ import type { CourseList } from "@/types/courseList";
 import CourseTable from "@/app/components/CourseFeature/CourseTable";
 import CourseSearch from "@/app/components/CourseFeature/CourseSearch";
 import EditCourseModal from "@/app/components/CourseFeature/EditCourseModal";
+import UserEnrollmentModal from "@/app/components/CourseFeature/UserEnrollmentModal";
 
+// Hàm bỏ dấu, phục vụ tìm kiếm
 const removeDiacritics = (str: string) => {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 };
@@ -21,12 +24,18 @@ export default function CourseListPage() {
   const [searchText, setSearchText] = useState<string>("");
   const [selectedCourse, setSelectedCourse] = useState<CourseList | null>(null);
   const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [isEnrollmentModalVisible, setEnrollmentModalVisible] = useState(false);
+  const [selectedCourseEnrollment, setSelectedCourseEnrollment] =
+    useState<string>("");
+
   const router = useRouter();
 
+  // Lấy danh sách khóa học khi mount
   useEffect(() => {
     fetchCourses();
   }, []);
 
+  // Gọi API lấy danh sách khóa học
   const fetchCourses = async () => {
     setLoading(true);
     try {
@@ -40,6 +49,7 @@ export default function CourseListPage() {
     setLoading(false);
   };
 
+  // Xóa khóa học
   const handleDelete = async (maKhoaHoc: string | number) => {
     setLoading(true);
     try {
@@ -62,6 +72,7 @@ export default function CourseListPage() {
     setLoading(false);
   };
 
+  // Sửa khóa học – mở modal với dữ liệu của khoá học
   const handleEdit = (maKhoaHoc: string | number) => {
     const courseToEdit = courses.find(
       (course) => course.maKhoaHoc === maKhoaHoc
@@ -72,6 +83,13 @@ export default function CourseListPage() {
     }
   };
 
+  // Mở modal quản lý ghi danh cho khóa học
+  const handleManageEnrollment = (maKhoaHoc: string | number) => {
+    setSelectedCourseEnrollment(String(maKhoaHoc));
+    setEnrollmentModalVisible(true);
+  };
+
+  // Tìm kiếm cục bộ
   const handleSearch = (value: string) => {
     setSearchText(value);
     const trimmed = value.trim();
@@ -107,14 +125,23 @@ export default function CourseListPage() {
           loading={loading}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onManageEnrollment={handleManageEnrollment}
         />
       </div>
 
+      {/* Modal chỉnh sửa khóa học */}
       <EditCourseModal
         visible={isEditModalVisible}
         course={selectedCourse}
         onCancel={() => setEditModalVisible(false)}
         onUpdated={fetchCourses}
+      />
+
+      {/* Modal quản lý ghi danh */}
+      <UserEnrollmentModal
+        visible={isEnrollmentModalVisible}
+        maKhoaHoc={selectedCourseEnrollment}
+        onCancel={() => setEnrollmentModalVisible(false)}
       />
     </>
   );

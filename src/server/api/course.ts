@@ -7,9 +7,9 @@ export type CourseData = {
   moTa: string;
   luotXem: number;
   danhGia: number;
-  hinhAnh: string; 
+  hinhAnh: string;
   maNhom: string;
-  ngayTao: string; 
+  ngayTao: string;
   maDanhMucKhoaHoc: string;
   taiKhoanNguoiTao: string;
 };
@@ -50,8 +50,12 @@ export const addCourse = async (courseData: CourseData) => {
   return api.post("/ThemKhoaHoc", courseData);
 };
 
-export const updateCourse = async (courseData: CourseData) => {
-  return api.put("/CapNhatKhoaHoc", courseData);
+export const updateCourse = (data: FormData) => {
+  return axios.post("/QuanLyKhoaHoc/CapNhatKhoaHocUpload", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 export const uploadCourseImage = async (file: File, tenKhoaHoc: string) => {
@@ -66,40 +70,19 @@ export const uploadCourseImage = async (file: File, tenKhoaHoc: string) => {
   });
 };
 
+export const postGhiDanhKhoaHoc = async (data: {
+  maKhoaHoc: string;
+  taiKhoan: string;
+}) => {
+  return api.post(`/GhiDanhKhoaHoc`, data);
+};
 
-// Ghi danh người dùng dựa vào khóa học
-// Thường sẽ dùng popup khi click vào khóa học, hiển thị các người dùng chưa ghi danh khóa học, thêm các modal cho table => Chỉnh sửa trang /courses/page.tsx
-export const postNguoiDungChuaGhiDanhKhoaHoc = async(maKhoaHoc: string) => {
-  return api.post(`/LayDanhSachNguoiDungChuaGhiDanh`, maKhoaHoc)
-}
-export const postDanhSachHocVienKhoaHoc = async(maKhoaHoc: string) => {
-  return api.post(`/LayDanhSachHocVienKhoaHoc`, maKhoaHoc)
-}
-export const postHocVienChoXetDuyet = async(maKhoaHoc: string) => {
-  return api.post(`/LayDanhSachHocVienChoXetDuyet`, maKhoaHoc)
-}
-export const postGhiDanhKhoaHoc = async(data: {maKhoaHoc: string, taiKhoan: string}) => {
-  return api.post(`/GhiDanhKhoaHoc`, data)
-}
-export const postHuyGhiDanh = async(data: {maKhoaHoc: string, taiKhoan: string}) => {
-  return api.post(`/HuyGhiDanh`, data)
-}
-
-
-// Ghi danh khóa học dựa vào người dùng
-// Chỉnh sửa trang /users/page.tsx, chỉnh sửa giống thằng courses
-export const postNguoiDungChuaGhiDanhHV = async(maKhoaHoc: string, taiKhoan: string) => {
-  return api.post(`/LayDanhSachNguoiDungChuaGhiDanh?taiKhoan=${taiKhoan}`, maKhoaHoc)
-}
-export const postLayDanhSachKhoaHocDaXetDuyet = async(taiKhoan: string) => {
-  return api.post(`/LayDanhSachKhoaHocDaXetDuyet`, taiKhoan)
-}
-export const postKhoaHocChoXetDuyet = async(taiKhoan: string) => {
-  return api.post(`/LayDanhSachKhoaHocChoXetDuyet`, taiKhoan)
-}
-export const postXacThucGhiDanhNguoiDung = async(data: {maKhoaHoc: string, taiKhoan: string}) => {
-  return api.post(`/GhiDanhKhoaHoc`, data)
-}
-export const postXoaKhoaHocNguoiDung = async(data: {maKhoaHoc: string, taiKhoan: string}) => {
-  return api.post(`/HuyGhiDanh`, data)
-}
+export const postHuyGhiDanh = async (data: {
+  maKhoaHoc: string;
+  taiKhoan: string;
+}) => {
+  return api.post(`/HuyGhiDanh`, {
+    MaKhoaHoc: data.maKhoaHoc,
+    TaiKhoan: data.taiKhoan,
+  });
+};

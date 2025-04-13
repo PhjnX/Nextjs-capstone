@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 import React, { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -12,8 +11,8 @@ import {
   MenuFoldOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-type MenuItem = Required<MenuProps>["items"][number];
-import logo from "../../../../public/logo-edutech.png";
+import logo from "../../../../public/logo_admin.png";
+import { logout } from "@/app/utils/logout";
 const { Sider } = Layout;
 
 interface SidebarProps {
@@ -28,8 +27,9 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
 
   const handleMenuClick = ({ key }: { key: string }) => {
     if (key === "logout") {
-      localStorage.removeItem("role");
+      logout();
       router.push("/auth");
+      return;
     }
     setLoading(true);
     setSelectedKey(key);
@@ -41,7 +41,7 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
     router.push(key);
   };
 
-  const adminMenu: MenuItem[] = [
+  const adminMenu: MenuProps["items"] = [
     !collapsed
       ? { label: "Giao diện -  Người dùng", type: "group" }
       : { type: "divider" },
@@ -50,7 +50,6 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
       key: "sub1",
       label: "Quản lý người dùng",
       icon: <SettingOutlined />,
-
       children: [
         { key: "/admin/users", label: "Danh sách người dùng" },
         { key: "/admin/users/add-user", label: "Thêm người dùng" },
@@ -66,28 +65,19 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
         { key: "/admin/courses/add-course", label: "Thêm khóa học" },
       ],
     },
-    {
-      key: "sub3",
-      label: "Học viên",
-      icon: <UserOutlined />,
-      children: [
-        { key: "/admin/student-list", label: "Danh sách học viên" },
-        { key: "/admin/add-student", label: "Thêm học viên" },
-        { key: "/admin/awaiting-approval", label: "Học viên chờ phê duyệt" },
-      ],
-    },
+
     !collapsed ? { label: "Hệ thống", type: "group" } : { type: "divider" },
     {
-      key: "sub4",
+      key: "sub3",
       label: "Tài khoản",
       icon: <UserOutlined />,
       children: [
         { key: "/admin/profile", label: "Thông tin cá nhân" },
-        { key: "/admin/settings", label: "Cập nhật mật khẩu" },
+        { key: "/admin/password", label: "Cập nhật mật khẩu" },
       ],
     },
     {
-      key: "/auth/logout",
+      key: "logout",
       label: "Đăng xuất",
       danger: true,
       icon: <LogoutOutlined />,
@@ -108,14 +98,14 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
       style={{ background: colorBgBase }}
     >
       <div className="relative px-4">
-        <div className="h-16">
-          {!collapsed ? (
-            <div className="flex items-center text-center w-full h-full">
-              <img src={logo.src} alt="Logo" width={200} />
-            </div>
-          ) : (
-            "" // nếu có logo khi về responsive thì thêm ở đây còn k tyhì để đại
-          )}
+        <div className="h-16 flex items-center justify-center">
+          <img
+            src={logo.src}
+            alt="Logo"
+            className={`transition-all duration-300 ${
+              collapsed ? "w-10" : "w-[75px]"
+            }`}
+          />
         </div>
         <Button
           className="absolute -right-4 top-3"
@@ -129,6 +119,7 @@ export default function AdminSidebar({ setLoading }: SidebarProps) {
           }}
         />
       </div>
+
       <div style={{ maxHeight: "calc(100vh - 64px)", overflowY: "auto" }}>
         <Menu
           theme="light"

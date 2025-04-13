@@ -28,37 +28,44 @@ const AddCoursePage = () => {
   const [form] = Form.useForm();
   const router = useRouter();
 
+  // Xử lý submit form
   const onFinish = async (values: any) => {
     try {
+      // Lấy file ảnh từ Upload (AntD trả về mảng fileList)
       const file = values.hinhAnh?.[0]?.originFileObj;
       if (!file) {
         toast.error("Vui lòng chọn file ảnh!");
         return;
       }
 
+      // Tạo object JSON cho API Thêm khóa học
       const courseData = {
         maKhoaHoc: values.maKhoaHoc,
-        biDanh: values.biDanh, 
+        biDanh: values.biDanh, // nếu backend cần
         tenKhoaHoc: values.tenKhoaHoc,
         moTa: values.moTa,
         luotXem: Number(values.luotXem) || 0,
         danhGia: Number(values.danhGia) || 0,
+        // Lưu lại tên file (VD: "avatar.jpg")
         hinhAnh: file.name,
         maNhom: values.maNhom,
+        // Chuyển ngày sang format "DD/MM/YYYY"
         ngayTao: values.ngayTao ? values.ngayTao.format("DD/MM/YYYY") : "",
         maDanhMucKhoaHoc: values.maDanhMucKhoaHoc,
         taiKhoanNguoiTao: values.taiKhoanNguoiTao,
       };
 
+      // 1) Gửi request thêm khóa học (dạng JSON)
       await addCourse(courseData);
 
+      // 2) Upload file ảnh (multipart/form-data)
       await uploadCourseImage(file, values.tenKhoaHoc);
 
       toast.success("Thêm khóa học thành công!");
       router.push("/admin/courses");
     } catch (error: any) {
       console.error("Lỗi thêm khóa học:", error);
-
+      // Lấy message lỗi từ response.data nếu có, nếu không thì hiện message mặc định
       const errorMessage = error?.response?.data || "Thêm khóa học thất bại!";
       toast.error(`Thêm khóa học thất bại: ${errorMessage}`);
     }
@@ -176,6 +183,24 @@ const AddCoursePage = () => {
           </Button>
         </Form.Item>
       </Form>
+
+      <style jsx global>{`
+        .ant-input,
+        .ant-input-affix-wrapper,
+        .ant-select-selector,
+        .ant-picker,
+        .ant-input-number,
+        .ant-input-number-input,
+        .ant-upload,
+        .ant-picker-input > input {
+          border-radius: 6px !important;
+        }
+        .ant-input::placeholder,
+        .ant-select-selection-placeholder,
+        .ant-picker-input > input::placeholder {
+          color: #a0aec0 !important;
+        }
+      `}</style>
     </div>
   );
 };

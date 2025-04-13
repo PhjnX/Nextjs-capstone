@@ -1,4 +1,6 @@
 "use client"; // Bắt buộc để dùng hook, localStorage, v.v...
+
+import "antd/dist/reset.css"; // ✅ Ant Design CSS reset — ĐÚNG CHỖ!
 import React, { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Layout, Spin, ConfigProvider } from "antd";
@@ -15,10 +17,13 @@ interface Props {
 export default function AdminLayoutClient({ children }: Props) {
   const router = useRouter();
 
+  // Xác định xem có đang hiển thị overlay loading (Spin) khi chuyển trang không
   const [loading, setLoading] = useState(false);
 
+  // Lưu thông tin user lấy từ API
   const [user, setUser] = useState(null);
 
+  // Lần đầu load component, kiểm tra token & gọi getMyInfor
   useEffect(() => {
     const accessToken = localStorage.getItem("accessToken");
     const role = localStorage.getItem("role");
@@ -33,6 +38,7 @@ export default function AdminLayoutClient({ children }: Props) {
           router.push("/auth");
         });
     } else {
+      // Nếu không có token hoặc role không phải "GV"
       router.push("/auth");
     }
   }, [router]);
@@ -41,9 +47,11 @@ export default function AdminLayoutClient({ children }: Props) {
     <div className="flex">
       <ConfigProvider componentSize="large">
         <Layout className="!h-screen">
+          {/* Sidebar */}
           <AdminSidebar setLoading={setLoading} />
 
           <Layout>
+            {/* Header */}
             <CustomHeader user={user} />
 
             <Content
@@ -63,6 +71,7 @@ export default function AdminLayoutClient({ children }: Props) {
                 </div>
               )}
 
+              {/* Nội dung các trang con */}
               {children}
             </Content>
           </Layout>
