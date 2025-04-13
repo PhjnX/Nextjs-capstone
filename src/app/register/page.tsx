@@ -2,17 +2,18 @@
 import { api } from "@/server/api/api";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { UserInfo } from "@/types/userInfo";
 
 function Register() {
-  const [userRegister, setUserRegister] = useState({
-    taiKhoan: "string",
-    matKhau: "string",
-    hoTen: "string",
+  const [userRegister, setUserRegister] = useState<UserInfo>({
+    taiKhoan: "",
+    matKhau: "",
+    hoTen: "",
     maLoaiNguoiDung: "HV",
-    soDT: "string",
+    soDT: "",
     maNhom: "GP01",
-    email: "string",
-    confirmPassword: "string",
+    email: "",
+    confirmPassword: "",
   });
 
   const router = useRouter();

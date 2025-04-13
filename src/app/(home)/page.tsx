@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { api } from "@/server/api/api";
-import CourseCard from "@/app/(home)/CourseCard/cart";
+import CourseCard from "@/app/(home)/CourseCard/card";
 import Header from "./components/Header/header";
 import Footer from "./components/Footer/footer";
 import { CourseList } from "@/types/courseList";

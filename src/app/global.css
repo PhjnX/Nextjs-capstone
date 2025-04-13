@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.custom-input .ant-input,
+.custom-input .ant-select-selector,
+.custom-input input {
+  @apply rounded-md focus:ring-2 focus:ring-blue-500 transition;
+}

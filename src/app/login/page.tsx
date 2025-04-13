@@ -22,7 +22,7 @@ export default function LoginPage() {
     if (user) {
       router.push("/");
     }
-  }, []);
+  }, [user, router]); // Thêm user và router vào dependencies
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,8 +31,10 @@ export default function LoginPage() {
       await dispatch(loginUser(userLogin)).unwrap();
       alert("Đăng nhập thành công!");
       router.push("/");
-    } catch (error) {
-      return error;
+    } catch (err) {
+      // Xử lý lỗi an toàn hơn, giả sử error là chuỗi hoặc đối tượng
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error("Đăng nhập thất bại:", errorMessage);
     }
   };
 
@@ -43,6 +45,7 @@ export default function LoginPage() {
       [name]: value,
     }));
   };
+
   return (
     <div className="bg-white rounded-lg">
       <div className="container flex flex-col mx-auto bg-white rounded-lg my-5">
@@ -63,7 +66,7 @@ export default function LoginPage() {
                   <img
                     className="h-5 mr-2"
                     src="https://raw.githubusercontent.com/Loopple/loopple-public-assets/main/motion-tailwind/img/logos/logo-google.png"
-                    alt=""
+                    alt="Sign in with Google"
                   />
                   Sign in with Google
                 </button>
@@ -129,7 +132,9 @@ export default function LoginPage() {
                     Forget password?
                   </a>
                 </div>
-                {error && <p className="text-red-500 mb-4 mt-0">{error}</p>}
+                {error && (
+                  <p className="text-red-500 mb-4 mt-0">{String(error)}</p>
+                )}
                 <button
                   type="submit"
                   className="w-full px-6 py-5 mb-5 text-sm font-bold leading-none text-white transition duration-300 md:w-96 rounded-2xl hover:bg-purple-600 focus:ring-4 focus:ring-purple-100 bg-purple-500"

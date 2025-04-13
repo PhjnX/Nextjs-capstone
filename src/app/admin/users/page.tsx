@@ -1,35 +1,51 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Table, Tag, Space, Button, Input } from "antd";
-import {
-  SearchOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
-import { getUsers, deleteUser, searchUser } from "@/server/api/user";
+import { Button, Space, Select } from "antd";
 import { useRouter } from "next/navigation";
-import { User } from "@/types/user";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { getUsers, deleteUser } from "@/server/api/user";
+import { User } from "@/types/user";
+import UserTable from "@/app/components/UserFeature/UserTable";
+import SearchInput from "@/app/components/UserFeature/UserSearch";
+import EditUserModal from "@/app/components/UserFeature/EditUserModal";
+import GhiDanhModal from "@/app/components/UserFeature/GhiDanhModal";
+
+const removeDiacritics = (str: string) =>
+  str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 export default function UserList() {
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState<string>("");
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editInitialValues, setEditInitialValues] = useState<Partial<any>>({});
+  const [filterRole, setFilterRole] = useState("ALL");
+  // Sử dụng tài khoản được chọn để quản lý ghi danh (HV)
+  const [ghiDanhModalVisible, setGhiDanhModalVisible] = useState(false);
+  const [selectedTaiKhoan, setSelectedTaiKhoan] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Lấy toàn bộ danh sách người dùng
+  // Lọc theo role
+  useEffect(() => {
+    const filteredUsers =
+      filterRole === "ALL"
+        ? allUsers
+        : allUsers.filter((u) => u.maLoaiNguoiDung === filterRole);
+    setUsers(filteredUsers);
+  }, [filterRole, allUsers]);
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
       const res = await getUsers();
-      setUsers(res.data);
+      setAllUsers(res.data); // Chỉ set allUsers, không lọc ở đây
     } catch (error) {
-      console.error("Lỗi lấy danh sách người dùng", error);
       toast.error("❌ Lỗi khi lấy danh sách người dùng!");
     }
     setLoading(false);
@@ -39,107 +55,70 @@ export default function UserList() {
     setLoading(true);
     try {
       await deleteUser(taiKhoan);
-      toast.success(`✅ Xóa người dùng ${taiKhoan} thành công!`, {
-        position: "top-right",
-        autoClose: 3000,
-      });
-      fetchUsers();
+      toast.success(`✅ Xóa người dùng ${taiKhoan} thành công!`);
+      fetchUsers(); // Load lại danh sách
     } catch (error: any) {
-      console.error("Lỗi xóa người dùng:", error);
+      console.error("Lỗi khi xóa người dùng:", error);
 
-      // Kiểm tra nếu API có trả về thông tin chi tiết
+      // Lấy thông điệp chi tiết từ API nếu có
       const errorMessage =
-        error.response?.data ||
-        error.response?.data?.message ||
-        "Xóa người dùng thất bại.";
+        error?.response?.data || // Trường hợp trả về plain text
+        error?.response?.data?.message || // Trường hợp trả về dạng object { message: "..." }
+        error?.message ||
+        "Đã xảy ra lỗi không xác định.";
 
-      if (typeof errorMessage === "object") {
-        toast.error(`❌ ${JSON.stringify(errorMessage)}`, {
-          position: "top-right",
-        });
-      } else {
-        toast.error(`❌ ${errorMessage}`, { position: "top-right" });
-      }
+      toast.error(`❌ Xóa người dùng thất bại: ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      performSearch();
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchText]);
+  const handleEdit = (taiKhoan: string) => {
+    const userToEdit = allUsers.find((user) => user.taiKhoan === taiKhoan);
+    if (userToEdit) {
+      setEditInitialValues({
+        taiKhoan: userToEdit.taiKhoan,
+        matKhau: "",
+        hoTen: userToEdit.hoTen,
+        soDT: userToEdit.soDt,
+        maLoaiNguoiDung: userToEdit.maLoaiNguoiDung,
+        maNhom: "GP01",
+        email: userToEdit.email,
+      });
+      setEditModalVisible(true);
+    }
+  };
 
-  const performSearch = async () => {
-    if (!searchText.trim()) {
-      fetchUsers();
+  const handleSearch = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      // Reset theo role
+      const filtered =
+        filterRole === "ALL"
+          ? allUsers
+          : allUsers.filter((u) => u.maLoaiNguoiDung === filterRole);
+      setUsers(filtered);
       return;
     }
-    setLoading(true);
-    try {
-      const res = await searchUser(searchText);
-      const filteredUsers = res.data.filter((user: User) =>
-        user.hoTen.toLowerCase().includes(searchText.toLowerCase())
-      );
-      setUsers(filteredUsers);
-    } catch (error) {
-      console.error("Lỗi tìm kiếm người dùng", error);
-      toast.error("❌ Lỗi khi tìm kiếm người dùng!");
-    }
-    setLoading(false);
+
+    const normalizedSearch = removeDiacritics(trimmed).toLowerCase();
+    const filtered = allUsers.filter((user) => {
+      const normalizedName = removeDiacritics(user.hoTen).toLowerCase();
+      return normalizedName.includes(normalizedSearch);
+    });
+
+    setUsers(filtered);
   };
 
-  const columns = [
-    {
-      title: "Tài khoản",
-      dataIndex: "taiKhoan",
-      key: "taiKhoan",
-    },
-    {
-      title: "Họ tên",
-      dataIndex: "hoTen",
-      key: "hoTen",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "soDt",
-      key: "soDt",
-    },
-    {
-      title: "Loại người dùng",
-      dataIndex: "maLoaiNguoiDung",
-      key: "maLoaiNguoiDung",
-      render: (text: string) => (
-        <Tag color={text === "GV" ? "geekblue" : "green"}>{text}</Tag>
-      ),
-    },
-    {
-      title: "Hành động",
-      key: "action",
-      render: (_: any, record: User) => (
-        <Space size="middle">
-          <Button
-            type="text"
-            icon={<EditOutlined style={{ color: "#fa8c16", fontSize: 18 }} />}
-            onClick={() =>
-              router.push(`/admin/users/edit-user?tk=${record.taiKhoan}`)
-            }
-          />
-          <Button
-            type="text"
-            icon={<DeleteOutlined style={{ color: "#f5222d", fontSize: 18 }} />}
-            onClick={() => handleDelete(record.taiKhoan)}
-          />
-        </Space>
-      ),
-    },
-  ];
+  const handleFilterRole = (role: string) => {
+    setFilterRole(role);
+  };
+
+  // Khi click icon ghi danh trên bảng, mở modal và truyền tài khoản của user đó
+  const handleGhiDanh = (taiKhoan: string) => {
+    setSelectedTaiKhoan(taiKhoan);
+    setGhiDanhModalVisible(true);
+  };
 
   return (
     <div>
@@ -150,21 +129,45 @@ export default function UserList() {
         >
           Thêm người dùng
         </Button>
-        <Input
-          placeholder="Nhập tên người dùng"
-          allowClear
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 300 }}
-          suffix={<SearchOutlined style={{ color: "#1890ff" }} />}
+        <SearchInput onSearch={handleSearch} delay={500} />
+        <Select
+          value={filterRole}
+          style={{ width: 150 }}
+          onChange={handleFilterRole}
+          options={[
+            { value: "ALL", label: "Tất cả" },
+            { value: "GV", label: "Giảng viên" },
+            { value: "HV", label: "Học viên" },
+          ]}
         />
       </Space>
-      <Table
-        columns={columns}
-        dataSource={users}
+
+      <UserTable
+        users={users}
         loading={loading}
-        rowKey="taiKhoan"
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+        onGhiDanh={handleGhiDanh} // Truyền sự kiện ghi danh (sẽ nhận tài khoản HV)
       />
+
+      <EditUserModal
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        initialValues={editInitialValues}
+        onUpdate={fetchUsers}
+      />
+
+      {/* Modal ghi danh dựa theo tài khoản người dùng */}
+      {selectedTaiKhoan && (
+        <GhiDanhModal
+          visible={ghiDanhModalVisible}
+          taiKhoan={selectedTaiKhoan}
+          onClose={() => {
+            setGhiDanhModalVisible(false);
+            setSelectedTaiKhoan(null);
+          }}
+        />
+      )}
     </div>
   );
 }

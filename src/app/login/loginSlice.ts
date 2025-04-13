@@ -1,19 +1,31 @@
 import { api } from "@/server/api/api";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
+interface UserData {
+  taiKhoan: string;
+  matKhau: string;
+  // Thêm các trường khác từ API
+}
+
+interface ApiError {
+  message: string;
+  [key: string]: any; // Nếu cần
+}
+
 interface UserState {
   loading: boolean;
-  data: any | null;
-  error: any | null;
+  data: UserData | null;
+  error: ApiError | string | null;
 }
 
 const storedUser =
   typeof window !== "undefined" ? localStorage.getItem("userInfo") : null;
+const initialData = storedUser ? (JSON.parse(storedUser) as UserData) : null;
 
 const initialState: UserState = {
   loading: false,
-  data: storedUser ? JSON.parse(storedUser) : null,
-  error: null as string | null,
+  data: initialData,
+  error: null,
 };
 
 export const loginUser = createAsyncThunk(
@@ -24,14 +36,17 @@ export const loginUser = createAsyncThunk(
   ) => {
     try {
       const result = await api.post("/QuanLyNguoiDung/DangNhap", userLogin);
-      const userDataLogin = result.data;
+      const userDataLogin = result.data as UserData;
 
       if (typeof window !== "undefined") {
         localStorage.setItem("userInfo", JSON.stringify(userDataLogin));
       }
       return userDataLogin;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Đăng nhập thất bại");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return rejectWithValue(error.message || "Đăng nhập thất bại");
+      }
+      return rejectWithValue("Đăng nhập thất bại");
     }
   }
 );
@@ -41,9 +56,9 @@ const userLoginSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action) => {
-      state.data = action.payload;
+      state.data = action.payload as UserData;
       if (typeof window !== "undefined") {
-        localStorage.setItem("userInfo", JSON.stringify(action.payload)); // Lưu vào localStorage
+        localStorage.setItem("userInfo", JSON.stringify(action.payload));
       }
     },
   },
@@ -52,10 +67,12 @@ const userLoginSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(loginUser.fulfilled, (state, action) => {
-      (state.loading = false), (state.data = action.payload);
+      state.loading = false;
+      state.data = action.payload as UserData;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
-      (state.loading = false), (state.error = action.payload);
+      state.loading = false;
+      state.error = action.payload as ApiError | string;
     });
   },
 });
