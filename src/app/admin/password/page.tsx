@@ -1,23 +1,27 @@
-"use client";
+"use client"
 
 import { Button, Card, Form, Input, message } from "antd";
 import { updateUser } from "@/server/api/user";
+import { useEffect, useState } from "react";
 
 const ChangePasswordPage = () => {
   const [form] = Form.useForm();
 
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("ADMIN_LOCAL") || "{}");
+    setCurrentUser(storedUser);
+  }, []);
   const onFinish = async (values: any) => {
-    const { newPassword } = values;
+    const { newPassword } = values
 
     try {
-      // Lấy thông tin người dùng hiện tại từ localStorage (hoặc context/auth)
-      const currentUser = JSON.parse(
-        localStorage.getItem("currentUser") || "{}"
-      );
-
+      // console.log('currentUser: ', currentUser);
+      
       if (!currentUser || !currentUser.taiKhoan) {
-        message.error("Không tìm thấy thông tin người dùng!");
-        return;
+        message.error("Không tìm thấy thông tin người dùng!")
+        return
       }
 
       const userData = {
