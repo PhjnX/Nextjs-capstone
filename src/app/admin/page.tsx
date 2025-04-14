@@ -21,7 +21,7 @@ import {
 } from "@/server/api/user";
 import { getCourses } from "@/server/api/course";
 
-const COLORS = ["#34d399", "#f97316"]; // xanh lá, cam
+const COLORS = ["#34d399", "#f97316"];
 
 export default function AdminDashboardPage() {
   const [chartData, setChartData] = useState<any[]>([]);
@@ -35,11 +35,15 @@ export default function AdminDashboardPage() {
       try {
         const courseRes = await getCourses();
         const courses = courseRes.data;
-        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+        console.log('courses: ', courses);
+        const currentUser = JSON.parse(localStorage.getItem("ADMIN_LOCAL") || "{}");
+        console.log('currentUser: ', currentUser.taiKhoan);
 
         const myCourses = courses.filter(
-          (c: any) => c.taiKhoanNguoiTao === currentUser.taiKhoan
+          // (c: any) => c.nguoiTao?.taiKhoan === currentUser.taiKhoan
+          (c: any) => c.nguoiTao?.taiKhoan === "1234"
         );
+        console.log('myCourses: ', myCourses);
 
         let approvedStudentCount = 0;
         let pendingStudentCount = 0;

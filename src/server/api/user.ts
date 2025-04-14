@@ -22,13 +22,11 @@ api.interceptors.request.use(
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
-      console.log(">>> Authorization header:", config.headers.Authorization);
     } else {
       console.warn(">>> Access token not found in localStorage");
     }
 
     config.headers.TokenCybersoft = CYBERSOFT_API_KEY;
-    console.log(">>> TokenCybersoft header:", config.headers.TokenCybersoft);
 
     return config;
   },
